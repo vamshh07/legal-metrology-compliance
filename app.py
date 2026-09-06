@@ -35,39 +35,48 @@ if "page" not in st.session_state:
 st.markdown("""
 <style>
 
-/* Main App */
 .stApp {
     background-color: #f5f7fb;
 }
 
-/* Remove unnecessary top space */
+/* MAIN CONTAINER */
 .block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 2rem;
+    padding-top: 4rem !important;
+    padding-bottom: 2rem !important;
     max-width: 1200px;
 }
 
-/* Hero Section */
+
+/* NAVIGATION BUTTONS */
+.stButton > button {
+    border-radius: 12px;
+    height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+
+/* HERO SECTION */
 .hero {
     background: linear-gradient(135deg, #102a43, #1f4e78);
-    padding: 60px 40px;
+    padding: 65px 40px;
     border-radius: 25px;
     text-align: center;
     color: white;
-    margin-top: 20px;
+    margin-top: 15px;
     margin-bottom: 35px;
 }
 
 .hero h1 {
     color: white;
     font-size: 52px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .hero h2 {
     color: #dbeafe;
     font-size: 28px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .hero p {
@@ -78,7 +87,8 @@ st.markdown("""
     margin: auto;
 }
 
-/* Section Titles */
+
+/* SECTION TITLES */
 .section-title {
     text-align: center;
     font-size: 32px;
@@ -95,7 +105,8 @@ st.markdown("""
     margin-bottom: 30px;
 }
 
-/* Feature Cards */
+
+/* FEATURE CARDS */
 .feature-card {
     background-color: white;
     padding: 25px;
@@ -121,7 +132,8 @@ st.markdown("""
     line-height: 1.6;
 }
 
-/* Workflow Cards */
+
+/* WORKFLOW CARDS */
 .workflow-card {
     background-color: white;
     padding: 25px;
@@ -140,7 +152,8 @@ st.markdown("""
     color: #1f4e78;
 }
 
-/* Page Header */
+
+/* PAGE HEADER */
 .page-header {
     background: linear-gradient(135deg, #1f4e78, #2563eb);
     padding: 35px;
@@ -159,7 +172,8 @@ st.markdown("""
     font-size: 17px;
 }
 
-/* About Cards */
+
+/* ABOUT CARDS */
 .about-card {
     background-color: white;
     padding: 28px;
@@ -169,7 +183,8 @@ st.markdown("""
     box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Footer */
+
+/* FOOTER */
 .footer {
     text-align: center;
     color: #6b7280;
@@ -185,7 +200,9 @@ st.markdown("""
 # NAVIGATION BAR
 # =========================================================
 
-nav1, nav2, nav3, nav4 = st.columns(4)
+st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+
+nav1, nav2, nav3, nav4 = st.columns(4, gap="medium")
 
 with nav1:
     if st.button("🏠 Home", use_container_width=True):
@@ -207,6 +224,8 @@ with nav4:
         st.session_state.page = "About"
         st.rerun()
 
+st.markdown("<div style='height:25px;'></div>", unsafe_allow_html=True)
+
 
 # =========================================================
 # HOME PAGE
@@ -225,7 +244,6 @@ if st.session_state.page == "Home":
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
     col1, col2, col3 = st.columns([1, 2, 1])
 
@@ -346,7 +364,6 @@ if st.session_state.page == "Home":
         unsafe_allow_html=True
     )
 
-
     work1, arrow1, work2, arrow2, work3 = st.columns(
         [3, 1, 3, 1, 3]
     )
@@ -426,19 +443,16 @@ elif st.session_state.page == "Scanner":
     </div>
     """, unsafe_allow_html=True)
 
-
     st.info(
         "📷 For better accuracy, upload clear images of the "
         "front, back, and side of the product package."
     )
-
 
     uploaded_files = st.file_uploader(
         "Upload Product Package Images",
         type=["jpg", "jpeg", "png"],
         accept_multiple_files=True
     )
-
 
     if uploaded_files:
 
@@ -459,9 +473,7 @@ elif st.session_state.page == "Scanner":
                     use_container_width=True
                 )
 
-
         st.divider()
-
 
         if st.button(
             "🚀 Scan All Images & Check Compliance",
@@ -483,7 +495,6 @@ elif st.session_state.page == "Scanner":
 
                     all_text += extracted_text
 
-
                 details = extract_product_details(all_text)
 
                 results, score, final_status = check_compliance(details)
@@ -498,7 +509,6 @@ elif st.session_state.page == "Scanner":
                 if result.get("status") == "MISSING":
                     missing_for_history.append(field)
 
-
             try:
                 save_scan(
                     score,
@@ -508,13 +518,9 @@ elif st.session_state.page == "Scanner":
             except Exception:
                 pass
 
-
             st.success("✅ Product analysis completed successfully!")
 
             st.divider()
-
-
-            # COMPLIANCE DASHBOARD
 
             st.subheader("📊 Compliance Assessment Dashboard")
 
@@ -547,8 +553,7 @@ elif st.session_state.page == "Scanner":
                 else:
                     st.warning(f"🟠 {final_status}")
 
-
-            st.progress(min(max(int(score), 0), 100))
+            st.progress(int(min(max(score, 0), 100)))
 
             st.divider()
 
@@ -572,7 +577,6 @@ elif st.session_state.page == "Scanner":
                     else:
                         st.error(f"❌ {key}: Not Detected")
 
-
             with right_col:
 
                 for key, value in items[midpoint:]:
@@ -583,11 +587,9 @@ elif st.session_state.page == "Scanner":
                         st.error(f"❌ {key}: Not Detected")
 
 
-            st.divider()
-
-
             # COMPLIANCE CHECK
 
+            st.divider()
             st.subheader("⚖️ Declaration Compliance Check")
 
             missing_fields = []
@@ -599,30 +601,21 @@ elif st.session_state.page == "Scanner":
 
                 if status == "COMPLIANT":
 
-                    st.success(
-                        f"✅ {field} — {message}"
-                    )
+                    st.success(f"✅ {field} — {message}")
 
                 elif status == "MISSING":
 
-                    st.error(
-                        f"❌ {field} — {message}"
-                    )
-
+                    st.error(f"❌ {field} — {message}")
                     missing_fields.append(field)
 
                 else:
 
-                    st.info(
-                        f"ℹ️ {field} — {message}"
-                    )
-
-
-            st.divider()
+                    st.info(f"ℹ️ {field} — {message}")
 
 
             # MISSING REQUIREMENTS
 
+            st.divider()
             st.subheader("⚠️ Missing Requirements")
 
             if missing_fields:
@@ -631,42 +624,23 @@ elif st.session_state.page == "Scanner":
                     st.warning(f"⚠️ {field}")
 
             else:
-
-                st.success(
-                    "🎉 No missing core declarations detected!"
-                )
-
-
-            st.divider()
+                st.success("🎉 No missing core declarations detected!")
 
 
             # SMART SUGGESTIONS
 
+            st.divider()
             st.subheader("💡 Smart Compliance Suggestions")
 
             suggestions = {
-                "Product Name":
-                    "Clearly mention the name or description of the commodity.",
-
-                "MRP":
-                    "Clearly declare the Maximum Retail Price inclusive of applicable taxes.",
-
-                "Net Quantity":
-                    "Clearly mention net quantity using an appropriate standard unit.",
-
-                "Packed Date":
-                    "Clearly declare the packing or manufacturing date.",
-
-                "Manufacturer":
-                    "Clearly mention manufacturer, packer, or importer details.",
-
-                "Consumer Care":
-                    "Provide consumer care contact details for complaints.",
-
-                "Unit Sale Price":
-                    "Mention unit sale price where applicable."
+                "Product Name": "Clearly mention the name or description of the commodity.",
+                "MRP": "Clearly declare the Maximum Retail Price inclusive of applicable taxes.",
+                "Net Quantity": "Clearly mention net quantity using an appropriate standard unit.",
+                "Packed Date": "Clearly declare the packing or manufacturing date.",
+                "Manufacturer": "Clearly mention manufacturer, packer, or importer details.",
+                "Consumer Care": "Provide consumer care contact details for complaints.",
+                "Unit Sale Price": "Mention unit sale price where applicable."
             }
-
 
             if missing_fields:
 
@@ -677,22 +651,15 @@ elif st.session_state.page == "Scanner":
                         "Ensure this declaration is clearly visible on the package."
                     )
 
-                    st.info(
-                        f"💡 {field}: {suggestion}"
-                    )
+                    st.info(f"💡 {field}: {suggestion}")
 
             else:
-
-                st.success(
-                    "Great! All major declarations were detected."
-                )
-
-
-            st.divider()
+                st.success("Great! All major declarations were detected.")
 
 
             # DOWNLOAD REPORT
 
+            st.divider()
             st.subheader("📄 Download Compliance Report")
 
             try:
@@ -713,10 +680,7 @@ elif st.session_state.page == "Scanner":
                 )
 
             except Exception as e:
-
-                st.warning(
-                    f"Report generation needs attention: {e}"
-                )
+                st.warning(f"Report generation needs attention: {e}")
 
 
             # RAW OCR TEXT
@@ -724,7 +688,6 @@ elif st.session_state.page == "Scanner":
             st.divider()
 
             with st.expander("🔎 View Raw OCR Extracted Text"):
-
                 st.text_area(
                     "OCR Output",
                     all_text,
@@ -745,16 +708,13 @@ elif st.session_state.page == "History":
     </div>
     """, unsafe_allow_html=True)
 
-
     try:
 
         history = get_history()
 
         if history is not None and len(history) > 0:
 
-            st.success(
-                f"📁 Total Scans Recorded: {len(history)}"
-            )
+            st.success(f"📁 Total Scans Recorded: {len(history)}")
 
             st.dataframe(
                 history,
@@ -762,17 +722,13 @@ elif st.session_state.page == "History":
             )
 
         else:
-
             st.info(
                 "No scan history available yet. "
                 "Scan a product to see results here."
             )
 
-    except Exception as e:
-
-        st.info(
-            "No scan history available yet."
-        )
+    except Exception:
+        st.info("No scan history available yet.")
 
 
 # =========================================================
@@ -791,7 +747,6 @@ elif st.session_state.page == "About":
     </div>
     """, unsafe_allow_html=True)
 
-
     st.markdown("""
     <div class="about-card">
         <h2>🎯 Project Objective</h2>
@@ -803,7 +758,6 @@ elif st.session_state.page == "About":
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
     st.markdown("""
     <div class="about-card">
@@ -819,7 +773,6 @@ elif st.session_state.page == "About":
     </div>
     """, unsafe_allow_html=True)
 
-
     st.markdown("""
     <div class="about-card">
         <h2>🔄 System Workflow</h2>
@@ -830,7 +783,6 @@ elif st.session_state.page == "About":
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
     st.markdown("""
     <div class="about-card">
@@ -854,11 +806,7 @@ st.divider()
 st.markdown("""
 <div class="footer">
     <h3>⚖️ LegalMet AI</h3>
-    <p>
-        AI-Based Packaged Commodity Compliance Assessment System
-    </p>
-    <p>
-        Smart India Hackathon Prototype 🚀
-    </p>
+    <p>AI-Based Packaged Commodity Compliance Assessment System</p>
+    <p>Smart India Hackathon Prototype 🚀</p>
 </div>
 """, unsafe_allow_html=True)
