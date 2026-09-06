@@ -7,583 +7,858 @@ from compliance_engine import check_compliance
 from report_generator import generate_report
 from history_manager import save_scan, get_history
 
-# ==================================================
+
+# =========================================================
 # PAGE CONFIGURATION
-# ==================================================
+# =========================================================
 
 st.set_page_config(
-    page_title="Legal Metrology Compliance Checker",
+    page_title="LegalMet AI",
     page_icon="⚖️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 
-# ==================================================
+# =========================================================
+# SESSION STATE
+# =========================================================
+
+if "page" not in st.session_state:
+    st.session_state.page = "Home"
+
+
+# =========================================================
 # CUSTOM CSS
-# ==================================================
+# =========================================================
 
 st.markdown("""
 <style>
 
-.main {
-    background-color: #f7f9fc;
+/* Main App */
+.stApp {
+    background-color: #f5f7fb;
 }
 
-.title-box {
-    background: linear-gradient(90deg, #1f4e78, #2e75b6);
-    padding: 30px;
-    border-radius: 15px;
+/* Remove unnecessary top space */
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #102a43, #1f4e78);
+    padding: 60px 40px;
+    border-radius: 25px;
+    text-align: center;
+    color: white;
+    margin-top: 20px;
+    margin-bottom: 35px;
+}
+
+.hero h1 {
+    color: white;
+    font-size: 52px;
+    margin-bottom: 10px;
+}
+
+.hero h2 {
+    color: #dbeafe;
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.hero p {
+    color: #e5edf5;
+    font-size: 18px;
+    line-height: 1.7;
+    max-width: 850px;
+    margin: auto;
+}
+
+/* Section Titles */
+.section-title {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 45px;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #6b7280;
+    font-size: 17px;
+    margin-bottom: 30px;
+}
+
+/* Feature Cards */
+.feature-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 18px;
+    min-height: 190px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.06);
+}
+
+.feature-card h2 {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.feature-card h3 {
+    color: #1f4e78;
+    font-size: 20px;
+}
+
+.feature-card p {
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* Workflow Cards */
+.workflow-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    min-height: 170px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.06);
+}
+
+.workflow-card h2 {
+    font-size: 35px;
+}
+
+.workflow-card h3 {
+    color: #1f4e78;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #1f4e78, #2563eb);
+    padding: 35px;
+    border-radius: 20px;
     color: white;
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
 }
 
-.result-card {
-    padding: 20px;
-    border-radius: 12px;
+.page-header h1 {
+    color: white;
+}
+
+.page-header p {
+    color: #eaf2ff;
+    font-size: 17px;
+}
+
+/* About Cards */
+.about-card {
     background-color: white;
-    border: 1px solid #e0e0e0;
-    margin-bottom: 15px;
+    padding: 28px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    color: #6b7280;
+    padding: 25px;
+    margin-top: 30px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
 
-# ==================================================
-# HEADER
-# ==================================================
+# =========================================================
+# NAVIGATION BAR
+# =========================================================
 
-st.markdown("""
-<div class="title-box">
-    <h1>⚖️ Packaged Commodity Compliance Checker</h1>
-    <p>
-        AI-powered system for checking packaged commodity labels
-        under Legal Metrology (Packaged Commodities) Rules
-    </p>
-</div>
-""", unsafe_allow_html=True)
+nav1, nav2, nav3, nav4 = st.columns(4)
 
+with nav1:
+    if st.button("🏠 Home", use_container_width=True):
+        st.session_state.page = "Home"
+        st.rerun()
 
-# ==================================================
-# INFORMATION
-# ==================================================
+with nav2:
+    if st.button("🔍 AI Scanner", use_container_width=True):
+        st.session_state.page = "Scanner"
+        st.rerun()
 
-st.info(
-    "📷 Upload one or multiple images of a product package. "
-    "Upload Front, Back and Side labels for better compliance analysis."
-)
+with nav3:
+    if st.button("📊 Scan History", use_container_width=True):
+        st.session_state.page = "History"
+        st.rerun()
 
-
-# ==================================================
-# MULTIPLE IMAGE UPLOAD
-# ==================================================
-
-uploaded_files = st.file_uploader(
-    "📤 Upload Product Package Images",
-    type=["jpg", "jpeg", "png"],
-    accept_multiple_files=True
-)
+with nav4:
+    if st.button("ℹ️ About", use_container_width=True):
+        st.session_state.page = "About"
+        st.rerun()
 
 
-# ==================================================
-# IF IMAGES ARE UPLOADED
-# ==================================================
+# =========================================================
+# HOME PAGE
+# =========================================================
 
-if uploaded_files:
+if st.session_state.page == "Home":
 
-    st.subheader("📷 Uploaded Product Images")
+    st.markdown("""
+    <div class="hero">
+        <h1>⚖️ LegalMet AI</h1>
+        <h2>AI-Powered Packaged Commodity Compliance System</h2>
+        <p>
+            An intelligent system that analyzes product packaging using OCR
+            and automatically checks mandatory declarations for preliminary
+            Legal Metrology compliance assessment.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # Create maximum 3 columns
-    columns = st.columns(
-        min(len(uploaded_files), 3)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+
+    with col2:
+        if st.button(
+            "🚀 Start Compliance Check",
+            type="primary",
+            use_container_width=True
+        ):
+            st.session_state.page = "Scanner"
+            st.rerun()
+
+
+    # FEATURES
+
+    st.markdown(
+        '<div class="section-title">✨ Intelligent Features</div>',
+        unsafe_allow_html=True
     )
 
-    images = []
-
-
-    # ==================================================
-    # DISPLAY UPLOADED IMAGES
-    # ==================================================
-
-    for index, uploaded_file in enumerate(uploaded_files):
-
-        image = Image.open(uploaded_file)
-
-        images.append(image)
-
-        with columns[index % 3]:
-
-            st.image(
-                image,
-                caption=f"Image {index + 1}",
-                use_container_width=True
-            )
-
-
-    st.divider()
-
-
-    # ==================================================
-    # AI SCANNER SECTION
-    # ==================================================
-
-    st.subheader("🔍 AI Compliance Scanner")
-
-    st.write("""
-    The system will:
-
-    1. Scan all uploaded product images
-    2. Extract text using OCR
-    3. Combine information from all sides
-    4. Identify mandatory declarations
-    5. Check Legal Metrology compliance
-    """)
-
-
-    scan_button = st.button(
-        "🚀 Scan All Images & Check Compliance",
-        use_container_width=True
+    st.markdown(
+        '<div class="section-subtitle">'
+        'Everything required for automated product package analysis'
+        '</div>',
+        unsafe_allow_html=True
     )
 
 
-    # ==================================================
-    # PROCESS PRODUCT IMAGES
-    # ==================================================
+    row1_col1, row1_col2, row1_col3 = st.columns(3)
 
-    if scan_button:
+    with row1_col1:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>📷</h2>
+            <h3>OCR Package Scanning</h3>
+            <p>
+                Extract important text and declarations directly
+                from product package images.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-        with st.spinner(
-            "🔍 AI is scanning all product package images..."
+    with row1_col2:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>⚖️</h2>
+            <h3>Compliance Verification</h3>
+            <p>
+                Automatically check important mandatory declarations
+                on packaged commodities.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with row1_col3:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>📊</h2>
+            <h3>Compliance Score</h3>
+            <p>
+                Get an instant percentage-based preliminary
+                compliance assessment.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    row2_col1, row2_col2, row2_col3 = st.columns(3)
+
+    with row2_col1:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>💡</h2>
+            <h3>Smart Suggestions</h3>
+            <p>
+                Receive useful recommendations for declarations
+                that require attention.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with row2_col2:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>📄</h2>
+            <h3>Automated Reports</h3>
+            <p>
+                Generate downloadable compliance reports
+                for further review.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with row2_col3:
+        st.markdown("""
+        <div class="feature-card">
+            <h2>📜</h2>
+            <h3>Scan History</h3>
+            <p>
+                Keep track of previous product compliance
+                assessments.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    # HOW IT WORKS
+
+    st.markdown(
+        '<div class="section-title">🔄 How It Works</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="section-subtitle">'
+        'Simple AI-powered workflow for product package verification'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    work1, arrow1, work2, arrow2, work3 = st.columns(
+        [3, 1, 3, 1, 3]
+    )
+
+    with work1:
+        st.markdown("""
+        <div class="workflow-card">
+            <h2>📷</h2>
+            <h3>1. Upload Product</h3>
+            <p>Upload clear images of the product package.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with arrow1:
+        st.markdown(
+            "<h1 style='text-align:center; padding-top:50px;'>→</h1>",
+            unsafe_allow_html=True
+        )
+
+    with work2:
+        st.markdown("""
+        <div class="workflow-card">
+            <h2>🔎</h2>
+            <h3>2. AI OCR Analysis</h3>
+            <p>Extract important product information automatically.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with arrow2:
+        st.markdown(
+            "<h1 style='text-align:center; padding-top:50px;'>→</h1>",
+            unsafe_allow_html=True
+        )
+
+    with work3:
+        st.markdown("""
+        <div class="workflow-card">
+            <h2>⚖️</h2>
+            <h3>3. Compliance Result</h3>
+            <p>Get compliance score and declaration analysis.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+    # FINAL CTA
+
+    st.markdown(
+        '<div class="section-title">Ready to Analyze Your Product?</div>',
+        unsafe_allow_html=True
+    )
+
+    cta1, cta2, cta3 = st.columns([1, 2, 1])
+
+    with cta2:
+        if st.button(
+            "🔍 Open AI Compliance Scanner",
+            type="primary",
+            use_container_width=True
+        ):
+            st.session_state.page = "Scanner"
+            st.rerun()
+
+
+# =========================================================
+# SCANNER PAGE
+# =========================================================
+
+elif st.session_state.page == "Scanner":
+
+    st.markdown("""
+    <div class="page-header">
+        <h1>🔍 AI Compliance Scanner</h1>
+        <p>
+            Upload product package images and analyze mandatory
+            declarations using OCR and rule-based compliance checks.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.info(
+        "📷 For better accuracy, upload clear images of the "
+        "front, back, and side of the product package."
+    )
+
+
+    uploaded_files = st.file_uploader(
+        "Upload Product Package Images",
+        type=["jpg", "jpeg", "png"],
+        accept_multiple_files=True
+    )
+
+
+    if uploaded_files:
+
+        st.subheader("📷 Uploaded Images")
+
+        images = []
+        columns = st.columns(min(len(uploaded_files), 3))
+
+        for index, uploaded_file in enumerate(uploaded_files):
+
+            image = Image.open(uploaded_file).convert("RGB")
+            images.append(image)
+
+            with columns[index % len(columns)]:
+                st.image(
+                    image,
+                    caption=f"Product Image {index + 1}",
+                    use_container_width=True
+                )
+
+
+        st.divider()
+
+
+        if st.button(
+            "🚀 Scan All Images & Check Compliance",
+            type="primary",
+            use_container_width=True
         ):
 
-            all_text = ""
+            with st.spinner("🔍 AI is analyzing the product package..."):
 
+                all_text = ""
 
-            # ==================================================
-            # OCR EACH IMAGE
-            # ==================================================
+                for index, image in enumerate(images):
 
-            for index, image in enumerate(images):
+                    extracted_text = extract_text(image)
 
-                extracted_text = extract_text(image)
-
-                all_text += (
-                    f"\n\n----- IMAGE {index + 1} -----\n"
-                )
-
-                all_text += extracted_text
-
-
-            # ==================================================
-            # EXTRACT PRODUCT INFORMATION
-            # ==================================================
-
-            details = extract_product_details(
-                all_text
-            )
-
-
-            # ==================================================
-            # CHECK COMPLIANCE
-            # ==================================================
-
-            results, score, final_status = check_compliance(
-                details
-            )
-        # Save scan to history
-        missing_for_history = []
-
-        for field, result in results.items():
-
-            if result["status"] == "MISSING":
-                missing_for_history.append(field)
-
-
-        save_scan(
-            score,
-            final_status,
-            missing_for_history
-        )
-
-
-        st.success(
-            "✅ Scanning completed successfully!"
-        )
-
-
-        st.divider()
-
-
-        # ==================================================
-        # COMPLIANCE DASHBOARD
-        # ==================================================
-
-        st.subheader(
-            "📊 Automated Preliminary Compliance Assessment"
-        )
-
-
-        metric1, metric2, metric3 = st.columns(3)
-
-
-        # --------------------------------------------------
-        # COMPLIANCE SCORE
-        # --------------------------------------------------
-
-        with metric1:
-
-            st.metric(
-                "Compliance Score",
-                f"{score:.0f}%"
-            )
-
-
-        # --------------------------------------------------
-        # REQUIREMENTS DETECTED
-        # --------------------------------------------------
-
-        with metric2:
-
-            total_fields = 0
-            found_fields = 0
-
-            for result in results.values():
-
-                if result["status"] in [
-                    "COMPLIANT",
-                    "MISSING"
-                ]:
-
-                    total_fields += 1
-
-                    if result["status"] == "COMPLIANT":
-
-                        found_fields += 1
-
-
-            st.metric(
-                "Requirements Detected",
-                f"{found_fields}/{total_fields}"
-            )
-
-
-        # --------------------------------------------------
-        # FINAL STATUS
-        # --------------------------------------------------
-
-        with metric3:
-
-            if final_status == "COMPLIANT":
-
-                st.success(
-                    "🟢 COMPLIANT"
-                )
-
-            else:
-
-                st.error(
-                    "🔴 NEEDS REVIEW"
-                )
-
-
-        # ==================================================
-        # PROGRESS BAR
-        # ==================================================
-
-        st.progress(int(score))
-
-
-        st.divider()
-
-
-        # ==================================================
-        # EXTRACTED PRODUCT INFORMATION
-        # ==================================================
-
-        st.subheader(
-            "📋 Extracted Product Information"
-        )
-
-
-        detail_col1, detail_col2 = st.columns(2)
-
-        items = list(details.items())
-
-        midpoint = (
-            len(items) + 1
-        ) // 2
-
-
-        # --------------------------------------------------
-        # LEFT COLUMN
-        # --------------------------------------------------
-
-        with detail_col1:
-
-            for key, value in items[:midpoint]:
-
-                if value:
-
-                    st.success(
-                        f"✅ **{key}**: {value}"
+                    all_text += (
+                        f"\n\n========== IMAGE {index + 1} ==========\n"
                     )
 
+                    all_text += extracted_text
+
+
+                details = extract_product_details(all_text)
+
+                results, score, final_status = check_compliance(details)
+
+
+            # SAVE HISTORY
+
+            missing_for_history = []
+
+            for field, result in results.items():
+
+                if result.get("status") == "MISSING":
+                    missing_for_history.append(field)
+
+
+            try:
+                save_scan(
+                    score,
+                    final_status,
+                    missing_for_history
+                )
+            except Exception:
+                pass
+
+
+            st.success("✅ Product analysis completed successfully!")
+
+            st.divider()
+
+
+            # COMPLIANCE DASHBOARD
+
+            st.subheader("📊 Compliance Assessment Dashboard")
+
+            metric1, metric2, metric3 = st.columns(3)
+
+            with metric1:
+                st.metric(
+                    "Compliance Score",
+                    f"{score:.0f}%"
+                )
+
+            with metric2:
+
+                total = len(results)
+
+                compliant = sum(
+                    1 for result in results.values()
+                    if result.get("status") == "COMPLIANT"
+                )
+
+                st.metric(
+                    "Requirements Found",
+                    f"{compliant}/{total}"
+                )
+
+            with metric3:
+
+                if final_status == "COMPLIANT":
+                    st.success("🟢 COMPLIANT")
                 else:
+                    st.warning(f"🟠 {final_status}")
+
+
+            st.progress(min(max(int(score), 0), 100))
+
+            st.divider()
+
+
+            # EXTRACTED DETAILS
+
+            st.subheader("📋 Extracted Product Information")
+
+            items = list(details.items())
+
+            left_col, right_col = st.columns(2)
+
+            midpoint = (len(items) + 1) // 2
+
+            with left_col:
+
+                for key, value in items[:midpoint]:
+
+                    if value:
+                        st.success(f"✅ {key}: {value}")
+                    else:
+                        st.error(f"❌ {key}: Not Detected")
+
+
+            with right_col:
+
+                for key, value in items[midpoint:]:
+
+                    if value:
+                        st.success(f"✅ {key}: {value}")
+                    else:
+                        st.error(f"❌ {key}: Not Detected")
+
+
+            st.divider()
+
+
+            # COMPLIANCE CHECK
+
+            st.subheader("⚖️ Declaration Compliance Check")
+
+            missing_fields = []
+
+            for field, result in results.items():
+
+                status = result.get("status", "")
+                message = result.get("message", "")
+
+                if status == "COMPLIANT":
+
+                    st.success(
+                        f"✅ {field} — {message}"
+                    )
+
+                elif status == "MISSING":
 
                     st.error(
-                        f"❌ **{key}**: Not Detected"
+                        f"❌ {field} — {message}"
                     )
 
-
-        # --------------------------------------------------
-        # RIGHT COLUMN
-        # --------------------------------------------------
-
-        with detail_col2:
-
-            for key, value in items[midpoint:]:
-
-                if value:
-
-                    st.success(
-                        f"✅ **{key}**: {value}"
-                    )
+                    missing_fields.append(field)
 
                 else:
 
                     st.info(
-                        f"ℹ️ **{key}**: "
-                        f"Not Detected / Conditional"
+                        f"ℹ️ {field} — {message}"
                     )
 
 
-        st.divider()
+            st.divider()
 
 
-        # ==================================================
-        # COMPLIANCE REQUIREMENT CHECK
-        # ==================================================
+            # MISSING REQUIREMENTS
 
-        st.subheader(
-            "⚖️ Declaration Compliance Check"
-        )
+            st.subheader("⚠️ Missing Requirements")
 
+            if missing_fields:
 
-        missing_fields = []
-
-
-        for field, result in results.items():
-
-            status = result["status"]
-
-            message = result["message"]
-
-
-            # --------------------------------------------------
-            # COMPLIANT
-            # --------------------------------------------------
-
-            if status == "COMPLIANT":
-
-                st.success(
-                    f"✅ **{field}** — {message}"
-                )
-
-
-            # --------------------------------------------------
-            # MISSING
-            # --------------------------------------------------
-
-            elif status == "MISSING":
-
-                st.error(
-                    f"❌ **{field}** — {message}"
-                )
-
-                missing_fields.append(field)
-
-
-            # --------------------------------------------------
-            # CONDITIONAL / INFORMATION
-            # --------------------------------------------------
+                for field in missing_fields:
+                    st.warning(f"⚠️ {field}")
 
             else:
 
-                st.info(
-                    f"ℹ️ **{field}** — {message}"
+                st.success(
+                    "🎉 No missing core declarations detected!"
                 )
 
 
-        st.divider()
+            st.divider()
 
 
-        # ==================================================
-        # MISSING REQUIREMENTS
-        # ==================================================
+            # SMART SUGGESTIONS
 
-        st.subheader(
-            "⚠️ Missing Requirements"
-        )
+            st.subheader("💡 Smart Compliance Suggestions")
+
+            suggestions = {
+                "Product Name":
+                    "Clearly mention the name or description of the commodity.",
+
+                "MRP":
+                    "Clearly declare the Maximum Retail Price inclusive of applicable taxes.",
+
+                "Net Quantity":
+                    "Clearly mention net quantity using an appropriate standard unit.",
+
+                "Packed Date":
+                    "Clearly declare the packing or manufacturing date.",
+
+                "Manufacturer":
+                    "Clearly mention manufacturer, packer, or importer details.",
+
+                "Consumer Care":
+                    "Provide consumer care contact details for complaints.",
+
+                "Unit Sale Price":
+                    "Mention unit sale price where applicable."
+            }
 
 
-        if not missing_fields:
+            if missing_fields:
 
-            st.success(
-                "🎉 No core mandatory declarations "
-                "are missing based on OCR detection."
-            )
+                for field in missing_fields:
 
-        else:
+                    suggestion = suggestions.get(
+                        field,
+                        "Ensure this declaration is clearly visible on the package."
+                    )
 
-            st.warning(
-                f"{len(missing_fields)} declaration(s) "
-                "need attention."
-            )
+                    st.info(
+                        f"💡 {field}: {suggestion}"
+                    )
 
-            for field in missing_fields:
+            else:
 
-                st.error(
-                    f"❌ {field}"
+                st.success(
+                    "Great! All major declarations were detected."
                 )
 
 
-        st.divider()
+            st.divider()
 
 
-        # ==================================================
-        # SMART COMPLIANCE SUGGESTIONS
-        # ==================================================
+            # DOWNLOAD REPORT
 
-        st.subheader(
-            "💡 Smart Compliance Suggestions"
-        )
+            st.subheader("📄 Download Compliance Report")
 
+            try:
 
-        suggestions = {
-
-            "Product Name":
-                "Clearly mention the name or description of the commodity.",
-
-            "MRP":
-                "Add Maximum Retail Price (MRP) inclusive of all taxes.",
-
-            "Net Quantity":
-                "Clearly declare the Net Quantity using a valid unit such as g, kg, ml or L.",
-
-            "Packed Date":
-                "Clearly mention the month/year or date of packing/manufacturing.",
-
-            "Manufacturer":
-                "Add the name and address of the manufacturer, packer or importer.",
-
-            "Consumer Care":
-                "Provide consumer care/contact details for complaints.",
-
-            "Unit Sale Price":
-                "Clearly mention the unit sale price where applicable."
-        }
-
-
-        if not missing_fields:
-
-            st.success(
-                "🎉 All core declarations were detected. "
-                "The package appears ready for further review."
-            )
-
-        else:
-
-            for field in missing_fields:
-
-                suggestion = suggestions.get(
-                    field,
-                    "Ensure this declaration is clearly visible."
+                report_html = generate_report(
+                    details,
+                    results,
+                    score,
+                    final_status
                 )
+
+                st.download_button(
+                    label="📥 Download Compliance Report",
+                    data=report_html,
+                    file_name="legalmet_compliance_report.html",
+                    mime="text/html",
+                    use_container_width=True
+                )
+
+            except Exception as e:
 
                 st.warning(
-                    f"💡 **{field}:** {suggestion}"
+                    f"Report generation needs attention: {e}"
                 )
 
 
-        st.divider()
+            # RAW OCR TEXT
+
+            st.divider()
+
+            with st.expander("🔎 View Raw OCR Extracted Text"):
+
+                st.text_area(
+                    "OCR Output",
+                    all_text,
+                    height=350
+                )
 
 
-        # ==================================================
-        # DOWNLOAD COMPLIANCE REPORT
-        # ==================================================
+# =========================================================
+# HISTORY PAGE
+# =========================================================
 
-        st.subheader(
-            "📄 Generate Compliance Report"
-        )
+elif st.session_state.page == "History":
 
-
-        report_html = generate_report(
-            details,
-            results,
-            score,
-            final_status
-        )
+    st.markdown("""
+    <div class="page-header">
+        <h1>📊 Scan History</h1>
+        <p>View previously recorded compliance assessments.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 
-        st.download_button(
-            label="📥 Download Compliance Report",
-            data=report_html,
-            file_name="compliance_report.html",
-            mime="text/html",
-            use_container_width=True
-        )
+    try:
 
+        history = get_history()
 
-        st.divider()
+        if history is not None and len(history) > 0:
 
-
-        # ==================================================
-        # RAW OCR OUTPUT
-        # ==================================================
-
-        with st.expander(
-            "🔎 View Combined OCR Extracted Text"
-        ):
-
-            st.text_area(
-                "OCR Output",
-                all_text,
-                height=400
+            st.success(
+                f"📁 Total Scans Recorded: {len(history)}"
             )
 
-# ==================================================
-# SCAN HISTORY DASHBOARD
-# ==================================================
+            st.dataframe(
+                history,
+                use_container_width=True
+            )
 
-st.divider()
+        else:
 
-st.subheader("📊 Recent Scan History")
+            st.info(
+                "No scan history available yet. "
+                "Scan a product to see results here."
+            )
 
-history = get_history()
+    except Exception as e:
+
+        st.info(
+            "No scan history available yet."
+        )
 
 
-if history:
+# =========================================================
+# ABOUT PAGE
+# =========================================================
 
-    st.dataframe(
-        history,
-        use_container_width=True
-    )
+elif st.session_state.page == "About":
 
-else:
+    st.markdown("""
+    <div class="page-header">
+        <h1>ℹ️ About LegalMet AI</h1>
+        <p>
+            AI-powered preliminary packaged commodity
+            compliance assessment system.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    st.info(
-        "No scans available yet. "
-        "Scan a product to create history."
-    )
-    
-# ==================================================
+
+    st.markdown("""
+    <div class="about-card">
+        <h2>🎯 Project Objective</h2>
+        <p>
+            LegalMet AI helps automate the preliminary analysis of
+            packaged commodity labels. The system uses OCR technology
+            to extract visible product declarations and a rule-based
+            engine to assess their presence.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("""
+    <div class="about-card">
+        <h2>🤖 Technologies Used</h2>
+        <ul>
+            <li>Python</li>
+            <li>Streamlit</li>
+            <li>Tesseract OCR</li>
+            <li>OpenCV</li>
+            <li>Rule-Based Compliance Engine</li>
+            <li>Automated Report Generation</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("""
+    <div class="about-card">
+        <h2>🔄 System Workflow</h2>
+        <p>
+            Product Image → OCR Text Extraction → Product Information
+            Detection → Compliance Rule Engine → Compliance Score →
+            Smart Suggestions → Downloadable Report
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+    st.markdown("""
+    <div class="about-card">
+        <h2>⚠️ Disclaimer</h2>
+        <p>
+            This application provides a preliminary automated assessment
+            based on OCR and programmed rules. Final legal compliance
+            verification should be performed by authorized professionals
+            or relevant authorities.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# =========================================================
 # FOOTER
-# ==================================================
+# =========================================================
 
 st.divider()
 
-st.caption(
-    "Smart India Hackathon Prototype | "
-    "AI-Based Legal Metrology Compliance Assessment System"
-)
+st.markdown("""
+<div class="footer">
+    <h3>⚖️ LegalMet AI</h3>
+    <p>
+        AI-Based Packaged Commodity Compliance Assessment System
+    </p>
+    <p>
+        Smart India Hackathon Prototype 🚀
+    </p>
+</div>
+""", unsafe_allow_html=True)
